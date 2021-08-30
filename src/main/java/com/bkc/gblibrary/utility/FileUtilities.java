@@ -57,19 +57,21 @@ public class FileUtilities {
 		FileUtils.copyURLToFile(url, file);
         
         if(catalogYN) {
-            String destDir = file.getParent();
+          String destDir = file.getParent();
 	        extractFile(destDir, fileName, destDir);
 	
 	        Optional<Catalog> existingCatalog = catalogRepository.findByName(fileName);
 	        
 			/*
+			 * java version conflict
+			 * 
 			 * existingCatalog.ifPresentOrElse((cat)->{ cat.setLastRefreshDt(Instant.now());
 			 * }, ()->{ Catalog catalog = getCatalog(); catalog.setName(fileName);
 			 * catalog.setUrl(urlString); catalog.setLastRefreshDt(Instant.now());
 			 * catalogRepository.save(catalog); });
-			 */
+			 */	        
 	        
-	        if(existingCatalog!=null) {
+	        if(existingCatalog.isPresent()) {
 	        	existingCatalog.get().setLastRefreshDt(Instant.now());
 			} else {
 				Catalog catalog = getCatalog(); catalog.setName(fileName);

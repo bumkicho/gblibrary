@@ -3,6 +3,10 @@ package com.bkc.gblibrary.beam;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
@@ -16,13 +20,16 @@ import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.io.jdbc.*;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.bkc.gblibrary.model.Catalog;
+import com.bkc.gblibrary.repository.CatalogRepository;
+
 
 @Component
-public class BatchProcessor {
+public class BookInfoDetailProcessor {
 	
 	@Value("${spring.datasource.driver-class-name}")
 	private String db_driver;
@@ -35,8 +42,14 @@ public class BatchProcessor {
 	
 	@Value("${spring.datasource.password}")
 	private String db_pwd;
+	
+	@Autowired
+	private CatalogRepository catalogRepository;
 
 	public void genearteWordCount(String dest, String fileName, Long bookId) {
+		
+		deleteFromTable(bookId);
+		
 		PipelineOptions pipelineOptions = PipelineOptionsFactory.create();
 		Pipeline pipeline = Pipeline.create(pipelineOptions);
 
@@ -57,6 +70,29 @@ public class BatchProcessor {
 					              }));
 
 		pipeline.run().waitUntilFinish();
+	}
+
+	private void deleteFromTable(Long bookId) {
+		Connection connection = null;
+        Statement stmt = null;
+        try
+        {
+            Class.forName(db_driver);
+            connection = DriverManager.getConnection(db_url, db_user, db_pwd);
+             
+            stmt = connection.createStatement();
+            stmt.execute("delete from gblibrary.book_info_detail where gb_book_id = " + bookId);
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {   
+                stmt.close();
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 	}
 
 	public static class ExtractWordsFn extends DoFn<String, String> {
@@ -90,6 +126,12 @@ public class BatchProcessor {
 		public String apply(KV<String, Long> input) {
 			return input.getKey() + ": " + input.getValue();
 		}
+	}
+
+	public void processThroughBookInfoByCatalog(String catalogName) {
+		Optional<Catalog> catalog = catalogRepository.findByName(catalogName);
+		if(catalog==null) return;
+		
 	}
 
 }

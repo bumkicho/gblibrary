@@ -3,8 +3,8 @@ package com.bkc.gblibrary.utility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -23,6 +23,12 @@ import com.bkc.gblibrary.model.BookInfo;
 import com.bkc.gblibrary.model.Catalog;
 import com.bkc.gblibrary.repository.BookInfoRepository;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Component
 public class CatalogFile {
 
@@ -35,6 +41,24 @@ public class CatalogFile {
 
 	@Autowired
 	private BookInfoRepository bookInfoRepository;
+	
+
+	public void saveBookInfo(File file, String id, Catalog catalog) throws IOException {
+		filePath = file.getCanonicalPath();
+		
+		book = getBookInfo();
+
+		book.setGbId(id);
+		try {
+			queryFile(file);
+			book.setBookURL("https://www.gutenberg.org/files/"+id+"/"+id+"-0.txt");
+			book.setCatalog(catalog);			
+			bookInfoRepository.save(book);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 	// query a catalog file and save it
 	public void saveBookInfo(File folder, Catalog catalog) {
