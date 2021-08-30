@@ -25,16 +25,12 @@ import lombok.Data;
 @Table(name = "associated_word")
 public class AssociatedWord {
 	
-	@Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Long id;
-	
 	@ManyToOne
-	@JoinColumn(name = "word_id")
+	@JoinColumn(name = "word")
 	Word word;
 	
 	@ManyToOne
-	@JoinColumn(name = "associated_word_id")
+	@JoinColumn(name = "associated_word")
 	Word associatedWord;
 
 }

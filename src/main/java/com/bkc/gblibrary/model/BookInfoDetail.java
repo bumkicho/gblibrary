@@ -2,7 +2,7 @@ package com.bkc.gblibrary.model;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,23 +17,25 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "book_info_detail")
-public class BookInfoDetail {
-	
+public class BookInfoDetail implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;	
-	
-	@Column(name = "node_value")
-	Long nodeValue;
 	
 	// books that are used for search
 	@ManyToOne
 	@JoinColumn(name = "gb_book_id")
 	BookInfo bookInfo;
 	
-	// words that are used for search
-	@ManyToOne
-	@JoinColumn(name = "word_id")
-	Word word;
-
+	@Column(name = "word")
+	String word;
+	
+	@Column(name = "word_count")
+	Long wordCount;
 }

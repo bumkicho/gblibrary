@@ -32,7 +32,7 @@ public class FileCatalogTest {
 		File file = new File(filePath);
 		
 		Optional<Catalog> catalog = catalogRepository.findByName(fileName);
-		if(catalog.isEmpty()) return;
+		if(catalog==null) return;
 		
 		catalogFile.saveBookInfo(file, catalog.get());
 	}

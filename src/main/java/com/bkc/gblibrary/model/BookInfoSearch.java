@@ -41,6 +41,9 @@ public class BookInfoSearch {
 	@Column(name = "search_dt")
 	LocalDateTime searchDt;
 	
+	@Column(name = "status", length=20)
+	String status;
+	
 	// books that are used for search
 	@ManyToOne
 	@JoinColumn(name = "gb_book_id")

@@ -2,6 +2,7 @@ package com.bkc.gblibrary.model;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
@@ -17,7 +18,12 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "book_info")
-public class BookInfo {
+public class BookInfo implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
     @GeneratedValue(strategy = IDENTITY)

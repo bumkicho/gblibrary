@@ -26,15 +26,12 @@ public class BookInfoSearchResult {
 	@JoinColumn(name = "gb_book_search_id")
 	BookInfoSearch bookInfoSearch;
 	
-	@Column(name = "search_status", length=20)
-	String searchStatus;
-	
 	@ManyToOne
-	@JoinColumn(name = "searched_word_id")
+	@JoinColumn(name = "returned_word")
 	Word word;
 
 	@ManyToOne
-	@JoinColumn(name = "searched_book_id")
+	@JoinColumn(name = "returned_book_id")
 	BookInfo bookInfo;
 
 }

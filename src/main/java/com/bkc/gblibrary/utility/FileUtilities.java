@@ -46,27 +46,37 @@ public class FileUtilities {
 	@Autowired
 	CatalogRepository catalogRepository;
 	
-	public void downloadFile(String urlString, String fileName, String dest) throws IOException {
-		FileUtils.cleanDirectory(new File(dest));
+	public void downloadFile(String urlString, String fileName, String dest, Boolean cleanYN, Boolean catalogYN) throws IOException {
+		
+		if(cleanYN) {
+			FileUtils.cleanDirectory(new File(dest));
+		}
+		
 		URL url = new URL(urlString+"/"+fileName);
 		File file = new File(dest+File.separatorChar+fileName);
-        FileUtils.copyURLToFile(url, file);
-        String destDir = file.getParent();
+		FileUtils.copyURLToFile(url, file);
         
-        extractFile(destDir, fileName, destDir);
-
-        Optional<Catalog> existingCatalog = catalogRepository.findByName(fileName);
-        
-        existingCatalog.ifPresentOrElse((cat)->{
-        	cat.setLastRefreshDt(Instant.now());
-        }, ()->{
-        	Catalog catalog = getCatalog();
-        	catalog.setName(fileName);
-        	catalog.setUrl(urlString);
-        	catalog.setLastRefreshDt(Instant.now());
-        	catalogRepository.save(catalog);
-        });
-        
+        if(catalogYN) {
+            String destDir = file.getParent();
+	        extractFile(destDir, fileName, destDir);
+	
+	        Optional<Catalog> existingCatalog = catalogRepository.findByName(fileName);
+	        
+			/*
+			 * existingCatalog.ifPresentOrElse((cat)->{ cat.setLastRefreshDt(Instant.now());
+			 * }, ()->{ Catalog catalog = getCatalog(); catalog.setName(fileName);
+			 * catalog.setUrl(urlString); catalog.setLastRefreshDt(Instant.now());
+			 * catalogRepository.save(catalog); });
+			 */
+	        
+	        if(existingCatalog!=null) {
+	        	existingCatalog.get().setLastRefreshDt(Instant.now());
+			} else {
+				Catalog catalog = getCatalog(); catalog.setName(fileName);
+				catalog.setUrl(urlString); catalog.setLastRefreshDt(Instant.now());
+				catalogRepository.save(catalog); 
+			}
+        }
     }
 
 	@Bean

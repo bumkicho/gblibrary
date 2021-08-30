@@ -27,7 +27,7 @@ public class GblibraryRunner {
 		if(args.length==1) {
 			if(args[0] == "refresh catalog") {
 				try {
-					fileUtilities.downloadFile("https://gutenberg.org/cache/epub/feeds", "rdf-files.tar.bz2", "D:\\Temp");
+					fileUtilities.downloadFile("https://gutenberg.org/cache/epub/feeds", "rdf-files.tar.bz2", "D:\\Temp", true, true);
 				} catch (IOException e) {
 					log.error("fileUtilites.downloadFile: " + e.getMessage());
 				}

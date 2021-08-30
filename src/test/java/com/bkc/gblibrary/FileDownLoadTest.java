@@ -26,7 +26,7 @@ public class FileDownLoadTest {
 
 	public void testFileUtilities() {
 		try {
-			fileUtilities.downloadFile("https://gutenberg.org/cache/epub/feeds", "rdf-files.tar.bz2", "D:\\Temp");
+			fileUtilities.downloadFile("https://gutenberg.org/cache/epub/feeds", "rdf-files.tar.bz2", "D:\\Temp", true, true);
 		} catch (IOException e) {
 			
 			System.out.println(e.getStackTrace());
