@@ -6,18 +6,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.beam.sdk.Pipeline;
-import org.apache.beam.sdk.io.FileIO;
-import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.SimpleFunction;
-import org.apache.beam.sdk.values.KV;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
 import com.bkc.gblibrary.model.Catalog;
@@ -35,6 +32,8 @@ public class BookInfoProcessor {
 	
 	@Autowired
 	private CatalogRepository catalogRepository;
+	
+	private @Autowired AutowireCapableBeanFactory beanFactory;
 	
 	public void processCatalog(String cataloFileName, String folderName) throws IOException {
 		Optional<Catalog> catalog = catalogRepository.findByName(cataloFileName);
@@ -70,20 +69,43 @@ public class BookInfoProcessor {
 		pipeline
 		.apply(Create.of(files))
 		.apply(ParDo.of(
-	            new DoFn<File, String>() {
-	                @ProcessElement
-	                public void process(@Element File file) {
-	                	String id = file.getParent().substring(file.getParent().lastIndexOf(File.separatorChar)+1);
-	                	try {
-							catalogFile.saveBookInfo(file, id, catalog);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-	                  String result = "Processed file is {} " + file.getName();
-	                }
-	              }));
+	            new ExtractBookInfo(beanFactory, catalog)));
 		
 		pipeline.run().waitUntilFinish();
+	}
+	
+	public static class ExtractBookInfo extends DoFn<File, String> {
+		
+		private static final long serialVersionUID = 1L;
+		
+		private AutowireCapableBeanFactory beanFactory;
+		
+		private CatalogFile catalogFile;
+		
+		private Catalog catalog;
+		
+		public ExtractBookInfo(AutowireCapableBeanFactory beanFactory, Catalog catalog) {
+			this.beanFactory = beanFactory;
+			this.catalog = catalog;
+		}
+
+		@ProcessElement
+        public void process(@Element File file) {
+        	String id = file.getParent().substring(file.getParent().lastIndexOf(File.separatorChar)+1);
+        	try {
+        		catalogFile = getCatalogFile();
+				catalogFile.saveBookInfo(file, id, catalog);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+          String result = "Processed file is {} " + file.getName();
+        }
+		
+		@Autowired
+		private CatalogFile getCatalogFile() {
+			return beanFactory.createBean(CatalogFile.class);
+		}
+		
 	}
 
 }

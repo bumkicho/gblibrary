@@ -32,7 +32,7 @@ public class BookInfo implements Serializable {
 	@Column(name = "gb_book_id", length=20)
 	String gbId;
 	
-	@Column(name = "gb_book_title", length=200)
+	@Column(name = "gb_book_title", length=500)
 	String title;
 	
 	@Column(name = "gb_book_url", length=200)
