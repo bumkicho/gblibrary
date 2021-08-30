@@ -27,16 +27,16 @@ public class InitialSetupTest {
 		//clears download folder, download latest catalog file, and extract them
 //		fileDownLoadTest.testFileUtilities(downloadUrl, catalogName, downloadFolder);
 		
-		try {
-			// go through rdf and populate book_info
-			fileCatalogTest.processCatalog(catalogName, downloadFolder);
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
+//		try {
+//			// go through rdf and populate book_info
+//			fileCatalogTest.processCatalog(catalogName, downloadFolder);
+//		} catch (IOException e) {
+//			System.out.println(e.getMessage());
+//		}
 		
 		// receive catalog, find all bookinfo by catalog
 		// go through bookinfo and populate bookinfodetail
-//		batchProcessorTest.bookInfoDetailProcessorTest(catalogName);
+		batchProcessorTest.bookInfoDetailProcessorTest(catalogName);
 	}
 
 }

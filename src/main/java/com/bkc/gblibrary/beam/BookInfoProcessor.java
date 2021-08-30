@@ -24,11 +24,11 @@ import com.bkc.gblibrary.utility.CatalogFile;
 @Component
 public class BookInfoProcessor {	
 	
-	@Autowired
-	private BookInfoDetailProcessor bookDetailProcessor;
-	
-	@Autowired
-	private CatalogFile catalogFile;
+//	@Autowired
+//	private BookInfoDetailProcessor bookDetailProcessor;
+//	
+//	@Autowired
+//	private CatalogFile catalogFile;
 	
 	@Autowired
 	private CatalogRepository catalogRepository;
@@ -37,27 +37,13 @@ public class BookInfoProcessor {
 	
 	public void processCatalog(String cataloFileName, String folderName) throws IOException {
 		Optional<Catalog> catalog = catalogRepository.findByName(cataloFileName);
-		if(catalog==null) return;
+		if(!catalog.isPresent()) return;
 		
 //		processThroughCatalog(catalog.get(), folderName);
 		generateBookInfoFromFiles(catalog.get(), folderName);
 	}
 	
-	// process rdf files one by one
-	public void processThroughCatalog(Catalog catalog, String folderName) throws IOException {
-		
-		File file = new File(folderName);
-		String[] extensions = new String[] {"rdf"};
-		String id;
-		
-		List<File> files = (List<File>) FileUtils.listFiles(file, extensions, true);		
-		
-		for (File f : files) {
-			id = f.getParent().substring(f.getParent().lastIndexOf(File.separatorChar)+1);
-			catalogFile.saveBookInfo(f, id, catalog);
-		}
-	}
-	
+	// process rdf files via Apache Beam pipeline	
 	public void generateBookInfoFromFiles(Catalog catalog, String folderName) {
 		PipelineOptions pipelineOptions = PipelineOptionsFactory.create();
 		Pipeline pipeline = Pipeline.create(pipelineOptions);

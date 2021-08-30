@@ -30,7 +30,7 @@ public class BookInfoDetail implements Serializable{
 	
 	// books that are used for search
 	@ManyToOne
-	@JoinColumn(name = "gb_book_id")
+	@JoinColumn(name = "book_id")
 	BookInfo bookInfo;
 	
 	@Column(name = "word")

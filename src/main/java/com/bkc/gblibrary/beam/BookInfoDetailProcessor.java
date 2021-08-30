@@ -1,9 +1,12 @@
 package com.bkc.gblibrary.beam;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -15,6 +18,7 @@ import org.apache.beam.sdk.metrics.Metrics;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Count;
+import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
@@ -22,10 +26,14 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.io.jdbc.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
+import com.bkc.gblibrary.model.BookInfo;
 import com.bkc.gblibrary.model.Catalog;
+import com.bkc.gblibrary.repository.BookInfoRepository;
 import com.bkc.gblibrary.repository.CatalogRepository;
+import com.bkc.gblibrary.utility.FileUtilities;
 
 
 @Component
@@ -45,8 +53,108 @@ public class BookInfoDetailProcessor {
 	
 	@Autowired
 	private CatalogRepository catalogRepository;
+	
+	@Autowired
+	private BookInfoRepository bookInfoRepository;
+	
+	private @Autowired AutowireCapableBeanFactory beanFactory;
+
+	public void processThroughBookInfoByCatalog(String catalogName) {
+		Optional<Catalog> catalog = catalogRepository.findByName(catalogName);
+		if(!catalog.isPresent()) return;
+		
+		List<BookInfo> bookInfoList = bookInfoRepository.findByCatalog(catalog.get())
+				.stream().filter(bookInfo -> Integer.parseInt(bookInfo.getGbId())<100)
+				.collect(Collectors.toList());
+		
+		PipelineOptions pipelineOptions = PipelineOptionsFactory.create();
+		Pipeline pipeline = Pipeline.create(pipelineOptions);
+		
+		pipeline
+		.apply(Create.of(bookInfoList))
+		.apply(ParDo.of(
+				new DownloadBookForDetail(beanFactory)));
+		
+		pipeline.run().waitUntilFinish();
+
+		pipeline
+		.apply(Create.of(bookInfoList))
+		.apply(ParDo.of(
+			new ProcessBookForDetail(beanFactory)));
+		
+		pipeline.run().waitUntilFinish();
+		
+		
+	}
+	
+	public static class DownloadBookForDetail extends DoFn<BookInfo, BookInfo> {
+		private static final long serialVersionUID = 1L;
+
+		private AutowireCapableBeanFactory beanFactory;
+		
+		private FileUtilities fileUtil;
+
+		public DownloadBookForDetail(AutowireCapableBeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+		
+		@ProcessElement
+		public void process(@Element BookInfo bookInfo) {
+			String fileURL = bookInfo.getBookURL();
+			String fileName = fileURL.substring(fileURL.lastIndexOf("/")+1, fileURL.length());
+			String fileLink = fileURL.substring(0, fileURL.lastIndexOf("/"));
+			String dest = "D:\\Temp";
+			
+			this.fileUtil = getFileUtilities();
+			
+			try {
+				fileUtil.downloadFile(fileLink, fileName, dest, false, false);
+			} catch (Exception e) {
+				//ignore for now
+				//e.printStackTrace();
+			}		
+		}
+		
+		@Autowired
+		private FileUtilities getFileUtilities() {
+			return this.beanFactory.createBean(FileUtilities.class);
+		}
+	}
+
+	public static class ProcessBookForDetail extends DoFn<BookInfo, String> {
+		private static final long serialVersionUID = 1L;
+
+		private AutowireCapableBeanFactory beanFactory;
+
+		private BookInfoDetailProcessor bookInfoDetailProcessor;
+
+		public ProcessBookForDetail(AutowireCapableBeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+		
+		@ProcessElement
+		public void process(@Element BookInfo bookInfo) {
+			String fileURL = bookInfo.getBookURL();
+			String fileName = fileURL.substring(fileURL.lastIndexOf("/")+1, fileURL.length());
+			String fileLink = fileURL.substring(0, fileURL.lastIndexOf("/"));
+			String dest = "D:\\Temp";
+			
+			bookInfoDetailProcessor = getBookInfoDetailProcessor();
+			bookInfoDetailProcessor.genearteWordCount(dest, fileName, bookInfo.getId());			
+		}
+		
+		@Autowired
+		private BookInfoDetailProcessor getBookInfoDetailProcessor() {
+			return beanFactory.createBean(BookInfoDetailProcessor.class);
+		}
+
+	}
 
 	public void genearteWordCount(String dest, String fileName, Long bookId) {
+		
+		if(!(new File(dest+File.separatorChar+fileName)).exists()) {
+			return;
+		}
 		
 		deleteFromTable(bookId);
 		
@@ -61,7 +169,7 @@ public class BookInfoDetailProcessor {
 					    		  db_driver, db_url)
 					          .withUsername(db_user)
 					          .withPassword(db_pwd))
-					      .withStatement("insert into gblibrary.book_info_detail (gb_book_id, word, word_count) values(?, ?, ?)")
+					      .withStatement("insert into gblibrary.book_info_detail (book_id, word, word_count) values(?, ?, ?)")
 					      .withPreparedStatementSetter(
 					              (element, statement) -> {
 					            	  statement.setLong(1, bookId);
@@ -81,7 +189,7 @@ public class BookInfoDetailProcessor {
             connection = DriverManager.getConnection(db_url, db_user, db_pwd);
              
             stmt = connection.createStatement();
-            stmt.execute("delete from gblibrary.book_info_detail where gb_book_id = " + bookId);
+            stmt.execute("delete from gblibrary.book_info_detail where book_id = " + bookId);
         } 
         catch (Exception e) {
             e.printStackTrace();
@@ -126,12 +234,6 @@ public class BookInfoDetailProcessor {
 		public String apply(KV<String, Long> input) {
 			return input.getKey() + ": " + input.getValue();
 		}
-	}
-
-	public void processThroughBookInfoByCatalog(String catalogName) {
-		Optional<Catalog> catalog = catalogRepository.findByName(catalogName);
-		if(catalog==null) return;
-		
 	}
 
 }
