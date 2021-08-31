@@ -33,6 +33,8 @@ import com.bkc.gblibrary.model.BookInfo;
 import com.bkc.gblibrary.model.Catalog;
 import com.bkc.gblibrary.repository.BookInfoRepository;
 import com.bkc.gblibrary.repository.CatalogRepository;
+import com.bkc.gblibrary.repository.StopWordRepository;
+import com.bkc.gblibrary.service.WordService;
 import com.bkc.gblibrary.utility.FileUtilities;
 
 
@@ -173,7 +175,7 @@ public class BookInfoDetailProcessor {
 		Pipeline pipeline = Pipeline.create(pipelineOptions);
 
 		pipeline.apply(TextIO.read().from(dest + File.separatorChar + fileName))
-				.apply(ParDo.of(new ExtractWordsFn()))
+				.apply(ParDo.of(new ExtractWordsFn(beanFactory)))
 				.apply(Count.perElement())
 				.apply(JdbcIO.<KV<String, Long>>write()
 					      .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(
@@ -217,12 +219,25 @@ public class BookInfoDetailProcessor {
 	public static class ExtractWordsFn extends DoFn<String, String> {
 
 		private static final long serialVersionUID = 1L;
+		
+		private AutowireCapableBeanFactory beanFactory;
+
+		private WordService wordService;		
 
 		private final Counter emptyLines = Metrics.counter(ExtractWordsFn.class, "emptyLines");
-		private final ArrayList<String> WORDSTOSKIP = new ArrayList<String>(Arrays.asList("the","The"));
+		private List<String> WORDSTOSKIP;
+
+		public ExtractWordsFn(AutowireCapableBeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
 
 		@ProcessElement
 		public void processElement(ProcessContext c) {
+			wordService = getWordService();
+			if(WORDSTOSKIP==null || WORDSTOSKIP.isEmpty()) {
+				WORDSTOSKIP = wordService.getAllStopWords();
+			}
+			
 			if (c.element().trim().isEmpty()) {
 				emptyLines.inc();
 			}
@@ -234,7 +249,13 @@ public class BookInfoDetailProcessor {
 					c.output(word);
 				}
 			}
-		}		
+		}
+		
+		@Autowired
+		private WordService getWordService() {
+			return beanFactory.createBean(WordService.class);
+		}
+
 	}
 
 	public static class ProcessBookInfo extends SimpleFunction<KV<String, Long>, String> {

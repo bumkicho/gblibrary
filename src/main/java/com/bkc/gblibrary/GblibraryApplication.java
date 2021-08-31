@@ -1,5 +1,6 @@
 package com.bkc.gblibrary;
 
+import org.springframework.boot.Banner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -17,6 +18,7 @@ public class GblibraryApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(GblibraryApplication.class);
+		app.setBannerMode(Banner.Mode.OFF);
 		app.run(args);
 	}
 	
