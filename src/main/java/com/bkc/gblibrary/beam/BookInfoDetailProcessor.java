@@ -71,7 +71,7 @@ public class BookInfoDetailProcessor {
 	
 	private List<String> ignoredWords;
 
-	public void processThroughBookInfoByCatalog(String catalogName, String range) {
+	public void processThroughBookInfoByCatalog(String catalogName, String range, String downloadFolder) {
 		Optional<Catalog> catalog = catalogRepository.findByName(catalogName);
 		if(!catalog.isPresent()) return;
 		
@@ -98,14 +98,14 @@ public class BookInfoDetailProcessor {
 		pipeline
 		.apply(Create.of(bookInfoList))
 		.apply(ParDo.of(
-				new DownloadBookForDetail(beanFactory)));
+				new DownloadBookForDetail(beanFactory, downloadFolder)));
 		
 		pipeline.run().waitUntilFinish();
 
 		pipeline
 		.apply(Create.of(bookInfoList))
 		.apply(ParDo.of(
-			new ProcessBookForDetail(beanFactory, ignoredWords)));
+			new ProcessBookForDetail(beanFactory, ignoredWords, downloadFolder)));
 		
 		pipeline.run().waitUntilFinish();
 		
@@ -118,9 +118,12 @@ public class BookInfoDetailProcessor {
 		private AutowireCapableBeanFactory beanFactory;
 		
 		private FileUtilities fileUtil;
+		
+		private String downloadFolder;
 
-		public DownloadBookForDetail(AutowireCapableBeanFactory beanFactory) {
+		public DownloadBookForDetail(AutowireCapableBeanFactory beanFactory, String downloadFolder) {
 			this.beanFactory = beanFactory;
+			this.downloadFolder = downloadFolder;
 		}
 		
 		@ProcessElement
@@ -128,7 +131,7 @@ public class BookInfoDetailProcessor {
 			String fileURL = bookInfo.getBookURL();
 			String fileName = fileURL.substring(fileURL.lastIndexOf("/")+1, fileURL.length());
 			String fileLink = fileURL.substring(0, fileURL.lastIndexOf("/"));
-			String dest = "D:\\Temp";
+			String dest = downloadFolder;
 			
 			this.fileUtil = getFileUtilities();
 			
@@ -154,10 +157,13 @@ public class BookInfoDetailProcessor {
 		private List<String> ignoredWords;
 
 		private BookInfoDetailProcessor bookInfoDetailProcessor;
+		
+		private String downloadFolder;
 
-		public ProcessBookForDetail(AutowireCapableBeanFactory beanFactory, List<String> ignoredWords) {
+		public ProcessBookForDetail(AutowireCapableBeanFactory beanFactory, List<String> ignoredWords, String downloadFolder) {
 			this.beanFactory = beanFactory;
 			this.ignoredWords = ignoredWords;
+			this.downloadFolder = downloadFolder;
 		}
 		
 		@ProcessElement
@@ -165,7 +171,7 @@ public class BookInfoDetailProcessor {
 			String fileURL = bookInfo.getBookURL();
 			String fileName = fileURL.substring(fileURL.lastIndexOf("/")+1, fileURL.length());
 			String fileLink = fileURL.substring(0, fileURL.lastIndexOf("/"));
-			String dest = "D:\\Temp";
+			String dest = downloadFolder;
 			
 			bookInfoDetailProcessor = getBookInfoDetailProcessor();
 			bookInfoDetailProcessor.genearteWordCount(dest, fileName, bookInfo.getId(), ignoredWords);			

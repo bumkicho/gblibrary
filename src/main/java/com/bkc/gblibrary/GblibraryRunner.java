@@ -70,7 +70,7 @@ public class GblibraryRunner {
 
 			this.catalogUrl = args[1]; // https://gutenberg.org/cache/epub/feeds
 			this.catalogName = args[2]; // rdf-files.tar.bz2
-			this.downloadFolder = args[3]; // "D:\\\\Temp"
+			this.downloadFolder = args[3]; // "D:\\Temp"
 			this.bookRange = args[4];
 			this.cleanYN = true;
 			this.catalogYN = true;
@@ -79,6 +79,7 @@ public class GblibraryRunner {
 
 			this.catalogName = args[1]; // rdf-files.tar.bz2
 			this.bookRange = args[2];
+			this.downloadFolder = args[3]; // "D:\\Temp"
 
 		} else if (this.command.equalsIgnoreCase("search_word")) {
 
@@ -115,12 +116,12 @@ public class GblibraryRunner {
 			}
 
 			bookInfoDetailProcessor = getBookInfoDetailProcessor();
-			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, this.bookRange);
+			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, this.bookRange, this.downloadFolder);
 
 		}  else if (this.command.equalsIgnoreCase("count")) {
 			
 			bookInfoDetailProcessor = getBookInfoDetailProcessor();
-			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, this.bookRange);
+			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, this.bookRange, this.downloadFolder);
 			
 		} else if (this.command.equalsIgnoreCase("search_word")) {
 

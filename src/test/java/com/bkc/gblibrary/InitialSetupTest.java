@@ -21,7 +21,7 @@ public class InitialSetupTest {
 	@Test
 	public void initSetup() {
 		String catalogName = "rdf-files.tar.bz2";
-		String downloadFolder = "D:\\\\Temp";
+		String downloadFolder = "D:\\Temp";
 		String downloadUrl = "https://gutenberg.org/cache/epub/feeds";
 		
 		//clears download folder, download latest catalog file, and extract them
