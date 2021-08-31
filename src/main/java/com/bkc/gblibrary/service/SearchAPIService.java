@@ -1,5 +1,6 @@
 package com.bkc.gblibrary.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,12 +31,27 @@ public class SearchAPIService {
 		if(!catalog.isPresent()) {
 			return null;
 		}
+		
+		List<SearchResultProjection> result;
+		List<BookInfo> books;
+		List<String> bookIDs = new ArrayList<String>();
+		
 		Optional<BookInfo> bookInfo = bookInfoRepository.findByGbId(bookId);
 		if(!bookInfo.isPresent()) {
-			return null;
+			books = bookInfoRepository.findAllByTitleContains(bookId);
+			if(books.size()==0) {
+				return null;
+			} else {
+				books.stream().forEach(b -> bookIDs.add(b.getGbId()));
+			}
 		}
 		
-		List<SearchResultProjection> result = bookInfoDetailRepository.findWordsInBookTopMost(catalog.get(), bookInfo.get().getGbId());
+		if(bookIDs.size()>0) {
+			result = bookInfoDetailRepository.findWordsFromBooksTopMost(catalog.get(), bookIDs);
+		} else {
+			result = bookInfoDetailRepository.findWordsInBookTopMost(catalog.get(), bookInfo.get().getGbId());
+		}
+		
 		if(result.size()>limit) {
 			return result.subList(0, limit);
 		}
