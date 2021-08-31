@@ -28,7 +28,7 @@ public class BatchProcessorTest {
 	
 	public void bookInfoDetailProcessorTest(String catalogName) {
 		bookInfoDetailProcessor = getBookInfoDetailProcessor();
-		bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName);
+		bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, "0-100");
 
 		
 	}

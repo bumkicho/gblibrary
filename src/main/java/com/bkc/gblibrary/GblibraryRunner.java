@@ -24,6 +24,7 @@ public class GblibraryRunner {
 	private String downloadFolder;
 	private String command;
 	private String word;
+	private String searchOption;
 	private int limit;
 	private String bookId;
 	private String bookRange;
@@ -64,14 +65,21 @@ public class GblibraryRunner {
 			this.catalogUrl = args[1]; // https://gutenberg.org/cache/epub/feeds
 			this.catalogName = args[2]; // rdf-files.tar.bz2
 			this.downloadFolder = args[3]; // "D:\\\\Temp"
+			this.bookRange = args[4];
 			this.cleanYN = true;
 			this.catalogYN = true;
+
+		} else if (this.command.equalsIgnoreCase("count")) {
+
+			this.catalogName = args[1]; // rdf-files.tar.bz2
+			this.bookRange = args[2];
 
 		} else if (this.command.equalsIgnoreCase("search_word")) {
 
 			this.catalogName = args[1];
 			this.bookId = args[2];
 			this.limit = Integer.parseInt(args[3]);
+			this.searchOption = args[4];
 
 		} else if (this.command.equalsIgnoreCase("search_book")) {
 
@@ -101,11 +109,16 @@ public class GblibraryRunner {
 			}
 
 			bookInfoDetailProcessor = getBookInfoDetailProcessor();
-			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName);
+			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, this.bookRange);
 
+		}  else if (this.command.equalsIgnoreCase("count")) {
+			
+			bookInfoDetailProcessor = getBookInfoDetailProcessor();
+			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, this.bookRange);
+			
 		} else if (this.command.equalsIgnoreCase("search_word")) {
 
-			List<SearchResultProjection> result = searchAPIService.searchWord(catalogName, bookId, limit);
+			List<SearchResultProjection> result = searchAPIService.searchWord(catalogName, bookId, limit, searchOption);
 			result.forEach(r -> {
 				displayResultItem(r);
 			});

@@ -1,12 +1,24 @@
+#spring:
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    password: sqlsrvr
+#    url: jdbc:postgresql://localhost:5432/db_gblibrary?currentSchema=gblibrary&ssl=false
+#    username: admin
+#  jpa:
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    password: sqlsrvr
-    url: jdbc:postgresql://localhost:5432/db_gblibrary?currentSchema=gblibrary&ssl=false
-    username: admin
+    password: e0eded5c9f71509d522e6cfe524f7bf757520e207fea510c87dda9185ce67c87
+    url: jdbc:postgresql://ec2-52-45-183-77.compute-1.amazonaws.com:5432/ddoo040sh9cjjq?currentSchema=gblibrary
+    username: orzoipxmbyegvf
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 

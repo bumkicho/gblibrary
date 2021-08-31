@@ -25,4 +25,9 @@ public interface BookInfoRepository extends JpaRepository<BookInfo, Long>{
             "where a.title like %:title%")
 	List<BookInfo> findAllByTitleContains(@Param("title") String title);
 
+	@Query("select a " +
+            "from BookInfo a " +
+            "where a.author like %:author%")
+	List<BookInfo> findAllByAuthorContains(@Param("author") String author);
+
 }

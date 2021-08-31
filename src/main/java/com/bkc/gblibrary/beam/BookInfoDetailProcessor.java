@@ -59,12 +59,23 @@ public class BookInfoDetailProcessor {
 	
 	private @Autowired AutowireCapableBeanFactory beanFactory;
 
-	public void processThroughBookInfoByCatalog(String catalogName) {
+	public void processThroughBookInfoByCatalog(String catalogName, String range) {
 		Optional<Catalog> catalog = catalogRepository.findByName(catalogName);
 		if(!catalog.isPresent()) return;
 		
+		int minId;
+		int maxId;
+
+		if(range!=null && !range.isEmpty()) {
+			minId = Integer.parseInt(range.substring(0, range.indexOf("-")));
+			maxId = Integer.parseInt(range.substring(range.indexOf("-")+1));
+		} else {
+			minId = 0;
+			maxId = 0;
+		}
+
 		List<BookInfo> bookInfoList = bookInfoRepository.findByCatalog(catalog.get())
-				.stream().filter(bookInfo -> Integer.parseInt(bookInfo.getGbId())<100)
+				.stream().filter(bookInfo -> (Integer.parseInt(bookInfo.getGbId())>=minId && Integer.parseInt(bookInfo.getGbId())<maxId))
 				.collect(Collectors.toList());
 		
 		PipelineOptions pipelineOptions = PipelineOptionsFactory.create();

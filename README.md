@@ -16,12 +16,17 @@
 	Create a database from the documents in the Project Gutenberg.
 	Create an interface which allows us to get the word count for each document, either searching by word or document Id.
 	Should include limit flag.
+	(Optional) search words by title or author
+	(Optional) creative features
+	(Optional) automated setup and configuration
+
+### Project development
 
 #### File transmission
 
 	Entire catalog of books in Gutenberg can be downloaded from https://gutenberg.org/cache/epub/feeds/rdf-files.tar.bz2
-	Should this app handle file transmission and uncompress it to be injested?
-	Should this be manual labor?
+	This system handles file transmission and uncompress it to extract a few key information of all documents.
+	This system handles transmisson of individual documents, if found, to extract word count data. (ETL) 
 
 #### Database design
 
