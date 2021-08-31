@@ -1,5 +1,7 @@
 package com.bkc.gblibrary;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,19 +9,25 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class GblibraryApplication implements CommandLineRunner {
+	
+	@Autowired
+	GblibraryRunner gbRunner;
+	
+	private @Autowired AutowireCapableBeanFactory beanFactory;
 
 	public static void main(String[] args) {
-		SpringApplication.run(GblibraryApplication.class, args);
+		SpringApplication app = new SpringApplication(GblibraryApplication.class);
+		app.run(args);
 	}
 	
 	@Override
 	public void run(String... args) throws Exception {
-		getLibraryRunner(args);
+		gbRunner.set(args);
+		gbRunner.run();
 	}
 	
 	@Bean
-	public GblibraryRunner getLibraryRunner(String[] args) {
-		return new GblibraryRunner(args);
+	public GblibraryRunner getGbrunner(String... args) {
+		return new GblibraryRunner();
 	}
-
 }

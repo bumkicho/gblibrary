@@ -16,4 +16,6 @@ public interface BookInfoRepository extends JpaRepository<BookInfo, Long>{
 	
 	List<BookInfo> findByCatalog(Catalog catalog);
 
+	Optional<BookInfo> findByGbId(String bookId);
+
 }
