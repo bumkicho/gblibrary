@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Index;
 
 import lombok.Data;
 
@@ -22,7 +23,9 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "associated_word")
+@Table(name = "associated_word",
+		indexes = {@Index(name = "idx_word",  columnList="word", unique = false),
+                @Index(name = "idx_associated_word", columnList="associated_word", unique = false)})
 public class AssociatedWord {
 	
 	@Id

@@ -12,6 +12,12 @@ import com.bkc.gblibrary.model.BookInfoDetail;
 import com.bkc.gblibrary.model.Catalog;
 import com.bkc.gblibrary.projection.SearchResultProjection;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Repository
 public interface BookInfoDetailRepository extends JpaRepository<BookInfoDetail, Long> {
 	

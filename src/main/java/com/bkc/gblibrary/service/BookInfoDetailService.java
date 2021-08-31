@@ -9,12 +9,15 @@ import com.bkc.gblibrary.model.BookInfoDetail;
 import com.bkc.gblibrary.repository.BookInfoDetailRepository;
 import com.bkc.gblibrary.repository.BookInfoRepository;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Service
 public class BookInfoDetailService implements Serializable {	
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	
 	@Autowired

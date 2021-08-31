@@ -21,6 +21,12 @@ import com.bkc.gblibrary.model.Catalog;
 import com.bkc.gblibrary.repository.CatalogRepository;
 import com.bkc.gblibrary.utility.CatalogFile;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Component
 public class BookInfoProcessor {	
 	

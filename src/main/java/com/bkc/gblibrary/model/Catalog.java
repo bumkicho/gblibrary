@@ -9,15 +9,25 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import lombok.Data;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Data
 @Entity
-@Table(name = "catalog")
+@Table(name = "catalog",
+	indexes = {@Index(name = "idx_name",  columnList="name", unique = true)})
 public class Catalog implements Serializable {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	@Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;

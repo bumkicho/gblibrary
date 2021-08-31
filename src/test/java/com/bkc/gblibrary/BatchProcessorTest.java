@@ -60,7 +60,7 @@ public class BatchProcessorTest {
 		fileUtil.downloadFile(fileLink, fileName, dest, false, false);
 		
 		bookInfoDetailProcessor = getBookInfoDetailProcessor();
-		bookInfoDetailProcessor.genearteWordCount(dest, fileName, bookId);
+		bookInfoDetailProcessor.genearteWordCount(dest, fileName, bookId, null);
 	}
 
 	@Autowired

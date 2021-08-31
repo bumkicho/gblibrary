@@ -7,6 +7,12 @@ import org.springframework.stereotype.Service;
 
 import com.bkc.gblibrary.repository.StopWordRepository;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Service
 public class WordService {
 

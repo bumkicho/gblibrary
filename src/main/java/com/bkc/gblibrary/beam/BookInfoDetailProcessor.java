@@ -37,6 +37,11 @@ import com.bkc.gblibrary.repository.StopWordRepository;
 import com.bkc.gblibrary.service.WordService;
 import com.bkc.gblibrary.utility.FileUtilities;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
 
 @Component
 public class BookInfoDetailProcessor {
@@ -60,6 +65,11 @@ public class BookInfoDetailProcessor {
 	private BookInfoRepository bookInfoRepository;
 	
 	private @Autowired AutowireCapableBeanFactory beanFactory;
+	
+	@Autowired
+	private WordService wordService;
+	
+	private List<String> ignoredWords;
 
 	public void processThroughBookInfoByCatalog(String catalogName, String range) {
 		Optional<Catalog> catalog = catalogRepository.findByName(catalogName);
@@ -75,6 +85,8 @@ public class BookInfoDetailProcessor {
 			minId = 0;
 			maxId = 0;
 		}
+		
+		ignoredWords = wordService.getAllStopWords();
 
 		List<BookInfo> bookInfoList = bookInfoRepository.findByCatalog(catalog.get())
 				.stream().filter(bookInfo -> (Integer.parseInt(bookInfo.getGbId())>=minId && Integer.parseInt(bookInfo.getGbId())<maxId))
@@ -93,7 +105,7 @@ public class BookInfoDetailProcessor {
 		pipeline
 		.apply(Create.of(bookInfoList))
 		.apply(ParDo.of(
-			new ProcessBookForDetail(beanFactory)));
+			new ProcessBookForDetail(beanFactory, ignoredWords)));
 		
 		pipeline.run().waitUntilFinish();
 		
@@ -138,11 +150,14 @@ public class BookInfoDetailProcessor {
 		private static final long serialVersionUID = 1L;
 
 		private AutowireCapableBeanFactory beanFactory;
+		
+		private List<String> ignoredWords;
 
 		private BookInfoDetailProcessor bookInfoDetailProcessor;
 
-		public ProcessBookForDetail(AutowireCapableBeanFactory beanFactory) {
+		public ProcessBookForDetail(AutowireCapableBeanFactory beanFactory, List<String> ignoredWords) {
 			this.beanFactory = beanFactory;
+			this.ignoredWords = ignoredWords;
 		}
 		
 		@ProcessElement
@@ -153,7 +168,7 @@ public class BookInfoDetailProcessor {
 			String dest = "D:\\Temp";
 			
 			bookInfoDetailProcessor = getBookInfoDetailProcessor();
-			bookInfoDetailProcessor.genearteWordCount(dest, fileName, bookInfo.getId());			
+			bookInfoDetailProcessor.genearteWordCount(dest, fileName, bookInfo.getId(), ignoredWords);			
 		}
 		
 		@Autowired
@@ -163,7 +178,7 @@ public class BookInfoDetailProcessor {
 
 	}
 
-	public void genearteWordCount(String dest, String fileName, Long bookId) {
+	public void genearteWordCount(String dest, String fileName, Long bookId, List<String> ignoredWords) {
 		
 		if(!(new File(dest+File.separatorChar+fileName)).exists()) {
 			return;
@@ -175,7 +190,7 @@ public class BookInfoDetailProcessor {
 		Pipeline pipeline = Pipeline.create(pipelineOptions);
 
 		pipeline.apply(TextIO.read().from(dest + File.separatorChar + fileName))
-				.apply(ParDo.of(new ExtractWordsFn(beanFactory)))
+				.apply(ParDo.of(new ExtractWordsFn(beanFactory, ignoredWords)))
 				.apply(Count.perElement())
 				.apply(JdbcIO.<KV<String, Long>>write()
 					      .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(
@@ -220,22 +235,20 @@ public class BookInfoDetailProcessor {
 
 		private static final long serialVersionUID = 1L;
 		
-		private AutowireCapableBeanFactory beanFactory;
-
-		private WordService wordService;		
+		private AutowireCapableBeanFactory beanFactory;			
 
 		private final Counter emptyLines = Metrics.counter(ExtractWordsFn.class, "emptyLines");
 		private List<String> WORDSTOSKIP;
 
-		public ExtractWordsFn(AutowireCapableBeanFactory beanFactory) {
+		public ExtractWordsFn(AutowireCapableBeanFactory beanFactory, List<String> ignoredWords) {
 			this.beanFactory = beanFactory;
+			this.WORDSTOSKIP = ignoredWords;
 		}
 
 		@ProcessElement
 		public void processElement(ProcessContext c) {
-			wordService = getWordService();
 			if(WORDSTOSKIP==null || WORDSTOSKIP.isEmpty()) {
-				WORDSTOSKIP = wordService.getAllStopWords();
+				WORDSTOSKIP = new ArrayList<String>();
 			}
 			
 			if (c.element().trim().isEmpty()) {
@@ -245,15 +258,10 @@ public class BookInfoDetailProcessor {
 			// Split the line into words.
 			String[] words = c.element().split("[^\\p{L}]+");
 			for (String word : words) {
-				if (!word.isEmpty() && word.length()>=3 && !WORDSTOSKIP.contains(word)) {
+				if (!word.isEmpty() && word.length()>=3 && !WORDSTOSKIP.contains(word.toUpperCase())) {
 					c.output(word);
 				}
 			}
-		}
-		
-		@Autowired
-		private WordService getWordService() {
-			return beanFactory.createBean(WordService.class);
 		}
 
 	}

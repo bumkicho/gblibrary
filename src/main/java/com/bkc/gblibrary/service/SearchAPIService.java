@@ -14,6 +14,12 @@ import com.bkc.gblibrary.repository.BookInfoDetailRepository;
 import com.bkc.gblibrary.repository.BookInfoRepository;
 import com.bkc.gblibrary.repository.CatalogRepository;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Service
 public class SearchAPIService {
 	

@@ -9,15 +9,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Data
 @Entity
-@Table(name = "book_info")
+@Table(name = "book_info",
+	indexes = {@Index(name = "idx_gbId",  columnList="gb_book_id", unique = true),
+	        @Index(name = "idx_title", columnList="gb_book_title", unique = false),
+	        @Index(name = "idx_author", columnList="gb_book_author", unique = false),
+	        @Index(name = "idx_catalog", columnList="catalog_id", unique = false)})
 public class BookInfo implements Serializable {
 
 	/**

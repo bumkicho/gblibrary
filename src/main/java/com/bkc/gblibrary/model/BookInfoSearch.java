@@ -14,6 +14,12 @@ import javax.persistence.Table;
 
 import lombok.Data;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Data
 @Entity
 @Table(name = "book_info_search")

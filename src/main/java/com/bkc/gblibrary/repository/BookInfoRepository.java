@@ -11,6 +11,12 @@ import org.springframework.stereotype.Repository;
 import com.bkc.gblibrary.model.BookInfo;
 import com.bkc.gblibrary.model.Catalog;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Repository
 public interface BookInfoRepository extends JpaRepository<BookInfo, Long>{
 

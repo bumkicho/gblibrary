@@ -16,6 +16,12 @@ import com.bkc.gblibrary.service.SearchAPIService;
 import com.bkc.gblibrary.utility.CatalogFile;
 import com.bkc.gblibrary.utility.FileUtilities;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 public class GblibraryRunner {
 	private static final Logger log = LogManager.getLogger(GblibraryRunner.class);
 

@@ -8,10 +8,16 @@ import org.springframework.stereotype.Repository;
 
 import com.bkc.gblibrary.model.StopWord;
 
+/**
+ * 
+ * @author bumki
+ *
+ */
+
 @Repository
 public interface StopWordRepository extends JpaRepository<StopWord, Long> {
 	
-	@Query("select a.word " +
+	@Query("select upper(a.word) " +
             "from StopWord a ")
 	List<String> findAllStopWord();
 
