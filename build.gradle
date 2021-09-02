@@ -37,6 +37,7 @@ dependencies {
 	implementation 'org.apache.beam:beam-sdks-java-core:2.32.0'
 	implementation 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.32.0'
 	implementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.32.0'
+	implementation 'com.google.guava:guava:30.1.1-jre'
 	
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
@@ -50,6 +51,8 @@ dependencies {
 	testImplementation 'org.apache.beam:beam-sdks-java-core:2.32.0'
 	testImplementation 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.32.0'
 	testImplementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.32.0'
+	testImplementation 'com.google.guava:guava:30.1.1-jre'
+
 }
 
 test {

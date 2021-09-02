@@ -2,6 +2,7 @@ package com.bkc.gblibrary.beam;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,11 +21,13 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Count;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.Instant;
 import org.apache.beam.sdk.io.jdbc.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -111,10 +114,9 @@ public class BookInfoDetailProcessor {
 			new ProcessBookForDetail(beanFactory, ignoredWords, downloadFolder)));
 		
 		pipeline.run().waitUntilFinish();
-		
-		
+
 	}
-	
+
 	public static class DownloadBookForDetail extends DoFn<BookInfo, BookInfo> {
 		private static final long serialVersionUID = 1L;
 
@@ -194,14 +196,7 @@ public class BookInfoDetailProcessor {
 		
 		deleteFromTable(bookId);
 		
-		DataflowPipelineOptions pipelineOptions = PipelineOptionsFactory.as(DataflowPipelineOptions.class);
-		
-		pipelineOptions.setJobName("gblibraryjob1");
-		pipelineOptions.setProject("gblibrary");
-		pipelineOptions.setRegion("us-central1");
-		pipelineOptions.setRunner(DataflowRunner.class);
-		pipelineOptions.setGcpTempLocation("gs://gblibrary_bucket//temp");
-		
+		PipelineOptions pipelineOptions = PipelineOptionsFactory.create();
 		Pipeline pipeline = Pipeline.create(pipelineOptions);
 
 		pipeline.apply(TextIO.read().from(dest + File.separatorChar + fileName))
@@ -221,6 +216,54 @@ public class BookInfoDetailProcessor {
 					              }));
 
 		pipeline.run().waitUntilFinish();
+		
+		writeToDataStorage(dest, fileName, ignoredWords);
+
+	}
+	
+	private void writeToDataStorage(String dest, String fileName, List<String> ignoredWords) {
+		
+		/*
+		 * Write ingoredWords to google data storage
+		 * DataflowPipeline appears to be super slow
+		 * Even just writing out ignored words takes awhile.
+		 */
+		DataflowPipelineOptions dataFlowPipelineOptions = PipelineOptionsFactory.as(DataflowPipelineOptions.class);
+		
+		//dataFlowPipelineOptions.setJobName("optional and needs to be unique");
+		dataFlowPipelineOptions.setProject("gblibrary");
+		dataFlowPipelineOptions.setRegion("us-central1");
+		dataFlowPipelineOptions.setRunner(DataflowRunner.class);
+		dataFlowPipelineOptions.setGcpTempLocation("gs://gblibrary_bucket//temp");
+		
+		Pipeline dataFlowPipeline = Pipeline.create(dataFlowPipelineOptions);
+
+		dataFlowPipeline.apply(Create.of(ignoredWords))
+				.apply(TextIO.write().to("gs://gblibrary_bucket//ignoredWords").withSuffix(".txt"));
+
+		dataFlowPipeline.run().waitUntilFinish();
+		
+		/*
+		 * Write word counts to google data storage via direct runner
+		 */
+		PipelineOptions dirPipelineOptions = PipelineOptionsFactory.create();
+		Pipeline dirPipeline = Pipeline.create(dirPipelineOptions);
+		
+		dirPipeline.apply(TextIO.read().from(dest + File.separatorChar + fileName))
+			.apply(ParDo.of(new ExtractWordsFn(beanFactory, ignoredWords)))
+			.apply(Count.perElement())
+			.apply(MapElements.via(new FormatAsText()))
+			.apply(TextIO.write().to("gs://gblibrary_bucket//"+fileName).withSuffix(".txt"));
+		
+		dirPipeline.run().waitUntilFinish();
+		
+	}
+	
+	public static class FormatAsText extends SimpleFunction<KV<String, Long>, String> {
+		@Override
+		public String apply(KV<String, Long> input) {
+			return input.getKey()+": "+input.getValue();
+		}
 	}
 
 	private void deleteFromTable(Long bookId) {
