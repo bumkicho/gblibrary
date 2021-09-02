@@ -15,6 +15,8 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,8 @@ import com.bkc.gblibrary.repository.BookInfoRepository;
 
 @Component
 public class CatalogFile {
+	
+	private static final Logger log = LogManager.getLogger(CatalogFile.class);
 
 	public static final String FILE_PREFIX = "pg";
 	public static final String FILE_EXTENSION = ".rdf";
@@ -55,7 +59,7 @@ public class CatalogFile {
 			book.setCatalog(catalog);			
 			bookInfoRepository.save(book);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 	}
@@ -81,7 +85,7 @@ public class CatalogFile {
 			book.setCatalog(catalog);			
 			bookInfoRepository.save(book);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 

@@ -2,7 +2,7 @@
 
 ### About
 
-	Project Gutenberg Word Count System 
+	Project Gutenberg Library System 
 
 ### Design considerations
 
@@ -50,6 +50,8 @@
 	JPA/Hibernate
 	PostgreSQL
 	Apache Beam
+	GCP Dataflow (writes ignored words)
+	Heroku
 
 #### Unusual library
 
@@ -59,11 +61,12 @@
 
 ### Enhancement considerations
 
+	Gcp dataflow - Big Query (not yet defined)
+	Write to Gcp pub/sub topic (not yet defined)
 	Keep track of search/results to detect search patterns
-	Auto generate word search pattern (e.g. if pattern of searching two words one after the other is detected, store them as associated words.
-	Requires rest endpoint detecting ip address or something similar)
+	Auto generate word search pattern (e.g. if pattern of searching two words one after the other is detected, store them as associated words. Requires rest endpoint detecting ip address or something similar)
 
-### Running instruction
+### Command Line Running
 
 #### Search book by word parameters
 	1. search command "search_book"
