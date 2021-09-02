@@ -7,6 +7,9 @@ plugins {
 group = 'com.bkc'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '8'
+bootJar {
+	mainClassName = 'com.bkc.gblibrary.GblibraryApplication'
+}
 
 configurations {
 	compileOnly {
@@ -16,6 +19,9 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven {
+        url "https://packages.confluent.io/maven/"
+    }
 }
 
 dependencies {
@@ -25,8 +31,13 @@ dependencies {
 	implementation 'org.apache.jena:jena-arq:3.17.0'
 	implementation 'commons-io:commons-io:2.11.0'
 	implementation 'org.apache.commons:commons-compress:1.21'
-	implementation group: 'org.apache.beam', name: 'beam-runners-direct-java', version: '2.32.0'
 	implementation 'org.apache.beam:beam-sdks-java-io-jdbc:2.32.0'
+
+	implementation 'org.apache.beam:beam-runners-direct-java:2.32.0'
+	implementation 'org.apache.beam:beam-sdks-java-core:2.32.0'
+	implementation 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.32.0'
+	implementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.32.0'
+	
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -34,7 +45,11 @@ dependencies {
 	testImplementation 'org.apache.beam:beam-sdks-java-core:2.32.0'
 	testImplementation 'commons-io:commons-io:2.11.0'
 	testImplementation 'org.apache.commons:commons-compress:1.21'
-	testImplementation group: 'org.apache.beam', name: 'beam-runners-direct-java', version: '2.32.0'
+
+	testImplementation 'org.apache.beam:beam-runners-direct-java:2.32.0'
+	testImplementation 'org.apache.beam:beam-sdks-java-core:2.32.0'
+	testImplementation 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.32.0'
+	testImplementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.32.0'
 }
 
 test {

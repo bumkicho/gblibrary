@@ -59,11 +59,12 @@
 
 ### Enhancement considerations
 
+	Run beams on spark engine?
 	Keep track of search/results to detect search patterns
 	Auto generate word search pattern (e.g. if pattern of searching two words one after the other is detected, store them as associated words.
 	Requires rest endpoint detecting ip address or something similar)
 
-### Running instruction
+### Command Line Running
 
 #### Search book by word parameters
 	1. search command "search_book"

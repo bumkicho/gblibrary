@@ -24,15 +24,15 @@ public class InitialSetupTest {
 		String downloadFolder = "D:\\Temp";
 		String downloadUrl = "https://gutenberg.org/cache/epub/feeds";
 		
-		//clears download folder, download latest catalog file, and extract them
-		fileDownLoadTest.testFileUtilities(downloadUrl, catalogName, downloadFolder);
-		
-		try {
-			// go through rdf and populate book_info
-			fileCatalogTest.processCatalog(catalogName, downloadFolder);
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
+//		//clears download folder, download latest catalog file, and extract them
+//		fileDownLoadTest.testFileUtilities(downloadUrl, catalogName, downloadFolder);
+//		
+//		try {
+//			// go through rdf and populate book_info
+//			fileCatalogTest.processCatalog(catalogName, downloadFolder);
+//		} catch (IOException e) {
+//			System.out.println(e.getMessage());
+//		}
 		
 		// receive catalog, find all bookinfo by catalog
 		// go through bookinfo and populate bookinfodetail

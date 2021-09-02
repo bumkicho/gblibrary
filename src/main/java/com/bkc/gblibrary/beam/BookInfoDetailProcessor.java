@@ -1,9 +1,7 @@
 package com.bkc.gblibrary.beam;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,6 +9,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+import org.apache.beam.runners.dataflow.DataflowRunner;
+import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.metrics.Counter;
@@ -23,6 +23,8 @@ import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.beam.sdk.io.jdbc.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +35,6 @@ import com.bkc.gblibrary.model.BookInfo;
 import com.bkc.gblibrary.model.Catalog;
 import com.bkc.gblibrary.repository.BookInfoRepository;
 import com.bkc.gblibrary.repository.CatalogRepository;
-import com.bkc.gblibrary.repository.StopWordRepository;
 import com.bkc.gblibrary.service.WordService;
 import com.bkc.gblibrary.utility.FileUtilities;
 
@@ -45,6 +46,8 @@ import com.bkc.gblibrary.utility.FileUtilities;
 
 @Component
 public class BookInfoDetailProcessor {
+	
+	private static final Logger log = LogManager.getLogger(BookInfoDetailProcessor.class);
 	
 	@Value("${spring.datasource.driver-class-name}")
 	private String db_driver;
@@ -138,8 +141,7 @@ public class BookInfoDetailProcessor {
 			try {
 				fileUtil.downloadFile(fileLink, fileName, dest, false, false);
 			} catch (Exception e) {
-				//ignore for now
-				//e.printStackTrace();
+				log.error(e.getMessage());
 			}		
 		}
 		
@@ -192,7 +194,14 @@ public class BookInfoDetailProcessor {
 		
 		deleteFromTable(bookId);
 		
-		PipelineOptions pipelineOptions = PipelineOptionsFactory.create();
+		DataflowPipelineOptions pipelineOptions = PipelineOptionsFactory.as(DataflowPipelineOptions.class);
+		
+		pipelineOptions.setJobName("gblibraryjob1");
+		pipelineOptions.setProject("gblibrary");
+		pipelineOptions.setRegion("us-central1");
+		pipelineOptions.setRunner(DataflowRunner.class);
+		pipelineOptions.setGcpTempLocation("gs://gblibrary_bucket//temp");
+		
 		Pipeline pipeline = Pipeline.create(pipelineOptions);
 
 		pipeline.apply(TextIO.read().from(dest + File.separatorChar + fileName))
@@ -226,13 +235,13 @@ public class BookInfoDetailProcessor {
             stmt.execute("delete from gblibrary.book_info_detail where book_id = " + bookId);
         } 
         catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }finally {
             try {   
                 stmt.close();
                 connection.close();
             } catch (Exception e) {
-                e.printStackTrace();
+            	log.error(e.getMessage());
             }
         }
 	}
