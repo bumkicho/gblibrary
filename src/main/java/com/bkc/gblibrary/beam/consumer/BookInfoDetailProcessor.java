@@ -1,4 +1,4 @@
-package com.bkc.gblibrary.beam;
+package com.bkc.gblibrary.beam.consumer;
 
 import java.io.File;
 import java.util.ArrayList;

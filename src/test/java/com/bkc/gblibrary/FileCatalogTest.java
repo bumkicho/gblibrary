@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.bkc.gblibrary.beam.BookInfoProcessor;
+import com.bkc.gblibrary.beam.publisher.BookInfoProcessor;
 
 @Component
 public class FileCatalogTest {

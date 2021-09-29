@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -50,14 +51,22 @@ public class CatalogFile {
 	public void saveBookInfo(File file, String id, Catalog catalog) throws IOException {
 		filePath = file.getCanonicalPath();
 		
+		Optional<BookInfo> existing = bookInfoRepository.findByGbId(id);
+		if(existing.isPresent()) {			
+			return;
+		}
+		
 		book = getBookInfo();
 
 		book.setGbId(id);
 		try {
+			
 			queryFile(file);
 			book.setBookURL("https://www.gutenberg.org/files/"+id+"/"+id+"-0.txt");
-			book.setCatalog(catalog);			
+			book.setCatalog(catalog);
+			book.setIsNew("Y");
 			bookInfoRepository.save(book);
+			
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
@@ -76,14 +85,24 @@ public class CatalogFile {
 		}
 		
 		filePath = pathToFile;
+		String bookId = folder.getName();
+		
+		Optional<BookInfo> existing = bookInfoRepository.findByGbId(bookId);
+		if(existing.isPresent()) {			
+			return;
+		}
+		
 		book = getBookInfo();
 
 		book.setGbId(folder.getName());
 		try {
+			
 			queryFile(file);
 			book.setBookURL("https://www.gutenberg.org/files/"+folder.getName()+"/"+folder.getName()+"-0.txt");
-			book.setCatalog(catalog);			
+			book.setCatalog(catalog);
+			book.setIsNew("Y");
 			bookInfoRepository.save(book);
+			
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}

@@ -7,6 +7,7 @@ plugins {
 group = 'com.bkc'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '8'
+//bootJar is for running beam on gcp dataflow pipeline from jar
 bootJar {
 	mainClassName = 'com.bkc.gblibrary.GblibraryApplication'
 }
@@ -16,7 +17,10 @@ configurations {
 		extendsFrom annotationProcessor
 	}
 }
-
+/* 
+ * confluent maven had to be added to resolve gradle dependency issues
+ * with gcop sdks and runners
+ */
 repositories {
 	mavenCentral()
 	maven {
@@ -37,6 +41,7 @@ dependencies {
 	implementation 'org.apache.beam:beam-sdks-java-core:2.32.0'
 	implementation 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.32.0'
 	implementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.32.0'
+	//there was hierarchy conflict and google guava had to be explicitly declared in dependencies
 	implementation 'com.google.guava:guava:30.1.1-jre'
 	
 	compileOnly 'org.projectlombok:lombok'

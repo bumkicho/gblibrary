@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
-import com.bkc.gblibrary.beam.BookInfoDetailProcessor;
+import com.bkc.gblibrary.beam.consumer.BookInfoDetailProcessor;
 import com.bkc.gblibrary.model.BookInfo;
 import com.bkc.gblibrary.repository.BookInfoRepository;
 import com.bkc.gblibrary.utility.FileUtilities;

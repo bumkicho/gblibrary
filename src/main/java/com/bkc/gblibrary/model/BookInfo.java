@@ -28,6 +28,7 @@ import lombok.Data;
 	indexes = {@Index(name = "idx_gbId",  columnList="gb_book_id", unique = true),
 	        @Index(name = "idx_title", columnList="gb_book_title", unique = false),
 	        @Index(name = "idx_author", columnList="gb_book_author", unique = false),
+	        @Index(name = "idx_is_new", columnList="is_new", unique = false),
 	        @Index(name = "idx_catalog", columnList="catalog_id", unique = false)})
 public class BookInfo implements Serializable {
 
@@ -61,6 +62,9 @@ public class BookInfo implements Serializable {
 	
 	@Column(name = "gb_book_modified")
 	LocalDateTime modifiedDt;
+	
+	@Column(name="is_new", length=1)
+	String isNew;
 	
 	@ManyToOne
 	@JoinColumn(name="catalog_id")

@@ -9,8 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import com.bkc.gblibrary.beam.BookInfoDetailProcessor;
-import com.bkc.gblibrary.beam.BookInfoProcessor;
+import com.bkc.gblibrary.beam.consumer.BookInfoDetailProcessor;
+import com.bkc.gblibrary.beam.publisher.BookInfoProcessor;
 import com.bkc.gblibrary.projection.SearchResultProjection;
 import com.bkc.gblibrary.service.SearchAPIService;
 import com.bkc.gblibrary.utility.CatalogFile;
@@ -75,6 +75,15 @@ public class GblibraryRunner {
 			this.cleanYN = true;
 			this.catalogYN = true;
 
+		} else if (this.command.equalsIgnoreCase("process")) {
+
+			this.catalogUrl = args[1]; // https://gutenberg.org/cache/epub/feeds
+			this.catalogName = args[2]; // rdf-files.tar.bz2
+			this.downloadFolder = args[3]; // "D:\\Temp"
+			this.bookRange = args[4];
+			this.cleanYN = true;
+			this.catalogYN = true;
+
 		} else if (this.command.equalsIgnoreCase("count")) {
 
 			this.catalogName = args[1]; // rdf-files.tar.bz2
@@ -117,6 +126,14 @@ public class GblibraryRunner {
 
 			bookInfoDetailProcessor = getBookInfoDetailProcessor();
 			bookInfoDetailProcessor.processThroughBookInfoByCatalog(catalogName, this.bookRange, this.downloadFolder);
+
+		} else if (this.command.equalsIgnoreCase("process")) {
+			
+			try {
+				bookInfoProcessor.processCatalog(catalogName, downloadFolder);
+			} catch (IOException e) {
+				log.error("bookInfoProcessor.processCatalog: " + e.getMessage());
+			}
 
 		}  else if (this.command.equalsIgnoreCase("count")) {
 			

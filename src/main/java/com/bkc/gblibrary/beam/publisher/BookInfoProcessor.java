@@ -1,9 +1,10 @@
-package com.bkc.gblibrary.beam;
+package com.bkc.gblibrary.beam.publisher;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptions;
@@ -11,14 +12,15 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
-
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
+import com.bkc.gblibrary.model.BookInfo;
 import com.bkc.gblibrary.model.Catalog;
 import com.bkc.gblibrary.repository.CatalogRepository;
+import com.bkc.gblibrary.service.BookInfoService;
 import com.bkc.gblibrary.utility.CatalogFile;
 
 /**
@@ -38,6 +40,9 @@ public class BookInfoProcessor {
 	
 	@Autowired
 	private CatalogRepository catalogRepository;
+	
+	@Autowired
+	private BookInfoService bookInfoService;
 	
 	private @Autowired AutowireCapableBeanFactory beanFactory;
 	
@@ -64,6 +69,14 @@ public class BookInfoProcessor {
 	            new ExtractBookInfo(beanFactory, catalog)));
 		
 		pipeline.run().waitUntilFinish();
+		
+		List<BookInfo> newBooks = catalogRepository.findAllBooksByCatalog(catalog)
+													.stream().filter(b -> b.getIsNew().equalsIgnoreCase("Y"))
+													.collect(Collectors.toList());
+		
+		BookInfoPublisher.publishNewBook(newBooks);
+		
+		newBooks.stream().forEach(nb -> bookInfoService.toggleBookInfoNew(nb, "N"));
 	}
 	
 	public static class ExtractBookInfo extends DoFn<File, String> {
@@ -99,5 +112,7 @@ public class BookInfoProcessor {
 		}
 		
 	}
+	
+	
 
 }
